@@ -3,20 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APJ Recording Countdown</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>APJ Recording Counters</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --border: #1e1e2e;
-    --accent: #e8ff47;
-    --accent-dim: rgba(232,255,71,0.15);
-    --accent-glow: rgba(232,255,71,0.3);
-    --text: #f0f0f5;
-    --muted: #555568;
-    --faded: #2a2a38;
-    --red: #ff4747;
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --border: #1e2330;
+    --accent: #c9a96e;
+    --accent-dim: #7a6340;
+    --text: #e8e2d9;
+    --text-muted: #4a5168;
+    --text-dim: #2a2f40;
+    --past-text: #2a2f40;
+    --next-glow: rgba(201,169,110,0.12);
+    --fy27: #7ab0d4;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,507 +25,473 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     min-height: 100vh;
+    padding: 52px 24px 80px;
+    position: relative;
     overflow-x: hidden;
   }
 
-  /* Subtle grid background */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     background-image:
-      linear-gradient(rgba(232,255,71,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(232,255,71,0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
+      linear-gradient(rgba(201,169,110,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,169,110,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
     pointer-events: none;
     z-index: 0;
   }
 
-  header {
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
     position: relative;
-    z-index: 10;
-    padding: 48px 40px 24px;
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-    border-bottom: 1px solid var(--border);
+    z-index: 1;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 52px;
+  }
+
+  .epigraph {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--accent-dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
   }
 
   .site-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(28px, 5vw, 52px);
-    letter-spacing: 0.08em;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-weight: 700;
     color: var(--text);
+    letter-spacing: 0.05em;
+    line-height: 1.1;
   }
 
-  .site-title span {
-    color: var(--accent);
-  }
-
-  .live-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: pulse 2s ease-in-out infinite;
-    flex-shrink: 0;
-    margin-bottom: 4px;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.7); }
-  }
-
-  .timezone-note {
-    margin-left: auto;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    text-align: right;
-    line-height: 1.5;
-  }
-
-  main {
-    position: relative;
-    z-index: 1;
-    padding: 40px;
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  /* NEXT UP — big featured card */
-  .card {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--surface);
-    padding: 28px 32px;
-    transition: all 0.4s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card.next {
-    border-color: var(--accent);
-    background: linear-gradient(135deg, rgba(232,255,71,0.06) 0%, var(--surface) 60%);
-    box-shadow: 0 0 40px var(--accent-glow), inset 0 0 40px rgba(232,255,71,0.02);
-    padding: 36px 40px;
-  }
-
-  .card.next::before {
-    content: 'UP NEXT';
-    position: absolute;
-    top: 16px;
-    right: 20px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--accent);
-    opacity: 0.8;
-  }
-
-  .card.past {
-    opacity: 0.28;
-    filter: grayscale(0.6);
-    border-color: var(--faded);
-    background: transparent;
-  }
-
-  .card.past .card-title {
-    text-decoration: line-through;
-    text-decoration-color: var(--muted);
-  }
-
-  .card-header {
+  .title-rule {
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
+    justify-content: center;
+    gap: 12px;
+    margin: 14px auto 0;
+  }
+  .title-rule span {
+    height: 1px;
+    width: 48px;
+    background: var(--accent);
+    opacity: 0.35;
+    display: block;
+  }
+  .title-rule em {
+    font-size: 0.45rem;
+    letter-spacing: 0.3em;
+    color: var(--accent-dim);
+    font-style: normal;
+    text-transform: uppercase;
   }
 
-  .card-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(18px, 3vw, 26px);
-    letter-spacing: 0.06em;
-    color: var(--text);
+  #clock {
+    margin-top: 10px;
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
   }
 
-  .card.next .card-title {
-    font-size: clamp(22px, 4vw, 36px);
-    color: var(--accent);
+  /* ── FY section ── */
+  .fy-section { margin-bottom: 40px; }
+
+  .fy-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    padding-left: 2px;
   }
 
-  .card-date {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    margin-left: auto;
+  /* ── Cards ── */
+  .recording-card {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 7px;
+    overflow: hidden;
+    transition: opacity 0.4s;
   }
 
-  .card.next .card-date {
-    color: rgba(232,255,71,0.6);
-    font-size: 13px;
+  /* PAST */
+  .recording-card.past {
+    background: #0f1118;
+    border-color: #161820;
+    opacity: 0.32;
   }
 
-  /* Countdown digits */
-  .countdown {
+  .recording-card.past .card-inner {
+    padding: 8px 16px;
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .recording-card.past .ep-label {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+
+  .recording-card.past .ep-date {
+    font-size: 0.58rem;
+    color: var(--text-dim);
+  }
+
+  /* NEXT */
+  .recording-card.next {
+    background: linear-gradient(135deg, #161921 0%, #1b1e28 100%);
+    border-color: var(--accent-dim);
+    box-shadow:
+      0 0 48px var(--next-glow),
+      0 0 100px rgba(201,169,110,0.03),
+      inset 0 1px 0 rgba(201,169,110,0.08);
+  }
+
+  .recording-card.next::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--accent) 0%, rgba(201,169,110,0.1) 100%);
+  }
+
+  .next-badge {
+    position: absolute;
+    top: 14px; right: 16px;
+    font-size: 0.48rem;
+    letter-spacing: 0.28em;
+    color: var(--accent);
+    opacity: 0.65;
+    text-transform: uppercase;
+  }
+
+  /* FUTURE */
+  .recording-card.future {
+    background: var(--surface);
+  }
+
+  /* ── Card inner ── */
+  .card-inner { padding: 14px 18px; }
+
+  .card-top {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .ep-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.07em;
+  }
+
+  .recording-card.future .ep-label {
+    color: var(--fy27);
+    opacity: 0.55;
+  }
+
+  .ep-date {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* Times */
+  .times-row {
+    display: flex;
+    gap: 18px;
+    margin-top: 5px;
+    margin-bottom: 0;
+  }
+
+  .time-entry {
+    font-size: 0.52rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+
+  .time-entry b {
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-right: 3px;
+  }
+
+  /* ── BIG countdown ── */
+  .countdown-big {
+    display: flex;
     align-items: flex-end;
+    margin-top: 20px;
+    border-top: 1px solid rgba(201,169,110,0.1);
+    padding-top: 18px;
   }
 
   .cd-unit {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    padding: 0 16px 0 0;
+    margin-right: 16px;
+    border-right: 1px solid var(--border);
   }
+  .cd-unit:last-child { border-right: none; padding-right: 0; margin-right: 0; }
 
   .cd-value {
-    font-family: 'Bebas Neue', sans-serif;
-    line-height: 1;
-    color: var(--text);
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 6px 14px 4px;
-    min-width: 52px;
-    text-align: center;
-    font-size: 32px;
-  }
-
-  .card.next .cd-value {
-    font-size: clamp(48px, 8vw, 80px);
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 7vw, 4.2rem);
+    font-weight: 700;
     color: var(--accent);
-    background: rgba(232,255,71,0.06);
-    border-color: rgba(232,255,71,0.2);
-    min-width: 90px;
-    padding: 10px 20px 6px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    min-width: 2ch;
+    text-align: center;
   }
 
   .cd-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.15em;
-    color: var(--muted);
+    font-size: 0.42rem;
+    letter-spacing: 0.22em;
+    color: var(--accent-dim);
     text-transform: uppercase;
+    margin-top: 5px;
   }
 
-  .card.next .cd-label {
-    font-size: 10px;
-    color: rgba(232,255,71,0.5);
+  /* ── Small countdown for future ── */
+  .countdown-small {
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    opacity: 0.55;
+    margin-left: auto;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
   }
 
-  .cd-sep {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    color: var(--muted);
-    margin-bottom: 14px;
-    line-height: 1;
-  }
-
-  .card.next .cd-sep {
-    font-size: clamp(40px, 6vw, 64px);
-    color: rgba(232,255,71,0.3);
-    margin-bottom: 22px;
-  }
-
-  /* Local times */
-  .local-times {
-    margin-top: 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-
-  .card.next .local-times {
-    font-size: 11px;
-    color: rgba(232,255,71,0.4);
-    margin-top: 18px;
-  }
-
-  .local-times span {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .local-times span::before {
-    content: '◆';
-    font-size: 6px;
-    opacity: 0.5;
-  }
-
-  /* LIVE banner */
-  .live-banner {
-    background: var(--red);
-    color: white;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 14px;
-    letter-spacing: 0.2em;
-    padding: 4px 12px;
-    border-radius: 2px;
-    animation: livePulse 1.5s ease-in-out infinite;
-    margin-left: 8px;
-  }
-
-  @keyframes livePulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-
-  /* Section divider */
-  .section-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.25em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-top: 8px;
-    padding: 0 2px;
-  }
-
-  /* Completed indicator for past cards */
-  .completed-mark {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    margin-top: 52px;
+    font-size: 0.52rem;
+    color: var(--text-dim);
     letter-spacing: 0.1em;
-    color: var(--muted);
-  }
-
-  @media (max-width: 600px) {
-    header { padding: 28px 20px 16px; flex-wrap: wrap; }
-    main { padding: 20px; gap: 12px; }
-    .card { padding: 20px; }
-    .card.next { padding: 24px 20px; }
-    .countdown { gap: 4px; }
-    .cd-value { min-width: 42px; font-size: 26px; padding: 5px 10px 3px; }
-    .card.next .cd-value { min-width: 64px; padding: 8px 12px 5px; }
   }
 </style>
 </head>
 <body>
+<div class="container">
 
-<header>
-  <div class="live-dot"></div>
-  <div class="site-title">APJ <span>Recording</span> Countdown</div>
-  <div class="timezone-note" id="tzNote">Loading timezone…</div>
-</header>
+  <div class="header">
+    <div class="epigraph">"So teach us to number our days"</div>
+    <h1 class="site-title">APJ Recording Counters</h1>
+    <div class="title-rule"><span></span><em>Live</em><span></span></div>
+    <div id="clock"></div>
+  </div>
 
-<main id="cardsContainer"></main>
+  <div id="recordings"></div>
+
+  <div class="footer">Countdown in your local time &nbsp;·&nbsp; Recording times shown for Minneapolis (Central) and Phoenix (MST/no DST)</div>
+</div>
 
 <script>
-// All recordings at 9:30 AM Central
-// Central = America/Chicago
+// ── Data (Central time) ──────────────────────────────────────────
 const recordings = [
-  { id: 'FY26 #18', month: 4,  day: 1,  year: 2026 },
-  { id: 'FY26 #19', month: 4,  day: 7,  year: 2026 },
-  { id: 'FY26 #20', month: 4,  day: 14, year: 2026 },
-  { id: 'FY26 #21', month: 4,  day: 21, year: 2026 },
-  { id: 'FY27 #01', month: 7,  day: 7,  year: 2026 },
-  { id: 'FY27 #02', month: 7,  day: 24, year: 2026 },
-  { id: 'FY27 #03', month: 7,  day: 28, year: 2026 },
-  { id: 'FY27 #04', month: 7,  day: 31, year: 2026 },
-  { id: 'FY27 #05', month: 9,  day: 22, year: 2026 },
-  { id: 'FY27 #06', month: 10, day: 30, year: 2026 },
-  { id: 'FY27 #07', month: 11, day: 3,  year: 2026 },
-  { id: 'FY27 #08', month: 11, day: 17, year: 2026 },
-  { id: 'FY27 #09', month: 11, day: 24, year: 2026 },
-  { id: 'FY27 #10', month: 12, day: 1,  year: 2026 },
-  { id: 'FY27 #11', month: 12, day: 8,  year: 2026 },
-  { id: 'FY27 #12', month: 12, day: 15, year: 2026 },
+  { label: 'FY26 #18', date: '2026-04-01', ct: '10:30', fy: 'FY26' },
+  { label: 'FY26 #19', date: '2026-04-07', ct: '09:30', fy: 'FY26' },
+  { label: 'FY26 #20', date: '2026-04-14', ct: '09:30', fy: 'FY26' },
+  { label: 'FY26 #21', date: '2026-04-21', ct: '09:30', fy: 'FY26' },
+  { label: 'FY27 #01', date: '2026-07-07', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #02', date: '2026-07-24', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #03', date: '2026-07-28', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #04', date: '2026-07-31', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #05', date: '2026-09-22', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #06', date: '2026-10-30', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #07', date: '2026-11-03', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #08', date: '2026-11-17', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #09', date: '2026-11-24', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #10', date: '2026-12-01', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #11', date: '2026-12-08', ct: '09:30', fy: 'FY27' },
+  { label: 'FY27 #12', date: '2026-12-15', ct: '09:30', fy: 'FY27' },
 ];
 
-// Get UTC timestamp for 9:30 AM Central on a given date
-// We build the date string and let Intl handle DST
-function getCentralTime(year, month, day) {
-  // Create a Date in Central time zone using a trick:
-  // Format: "YYYY-MM-DDTHH:mm:ss" interpreted as Central
-  const pad = n => String(n).padStart(2, '0');
-  const str = `${year}-${pad(month)}-${pad(day)}T09:30:00`;
-  // Use Intl to figure out the UTC offset for that date in Chicago
-  const ref = new Date(str + 'Z');
-  const centralFormatter = new Intl.DateTimeFormat('en-US', {
+// ── Central → UTC ────────────────────────────────────────────────
+function centralToUTC(dateStr, timeStr) {
+  const [yr, mo, dy] = dateStr.split('-').map(Number);
+  const [hr, mn] = timeStr.split(':').map(Number);
+  // Create a date object representing this wall-clock time in local time,
+  // then adjust by the difference between local and Chicago.
+  const localDate = new Date(yr, mo - 1, dy, hr, mn, 0);
+  // Format that UTC moment as Chicago time
+  const chicagoParts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Chicago',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', minute: 'numeric', second: 'numeric',
     hour12: false
-  });
-  // Binary-search-free approach: use epoch math
-  // Simpler: use the offset from a known reference
-  // Best approach: construct via toLocaleString parsing
-  const approx = new Date(`${year}-${pad(month)}-${pad(day)}T15:30:00Z`); // rough UTC for CST
-  // Iterate to find exact UTC
-  let test = approx;
-  for (let i = 0; i < 2; i++) {
-    const parts = centralFormatter.formatToParts(test);
-    const p = {};
-    parts.forEach(pt => p[pt.type] = pt.value);
-    const testLocal = new Date(`${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}Z`);
-    const diff = testLocal - new Date(`${year}-${pad(month)}-${pad(day)}T09:30:00Z`);
-    test = new Date(test.getTime() - diff);
-  }
-  return test;
+  }).formatToParts(localDate);
+  const cp = {};
+  chicagoParts.forEach(p => { if (p.type !== 'literal') cp[p.type] = parseInt(p.value); });
+  const chicagoAsLocal = new Date(cp.year, cp.month - 1, cp.day,
+    cp.hour === 24 ? 0 : cp.hour, cp.minute, cp.second);
+  const offset = localDate - chicagoAsLocal;
+  return new Date(localDate.getTime() + offset);
 }
 
-function formatLocalTime(date, tz) {
-  return date.toLocaleTimeString('en-US', {
-    timeZone: tz,
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  });
+// ── Format helpers ───────────────────────────────────────────────
+function fmtTime(utc, tz) {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, hour: 'numeric', minute: '2-digit', hour12: true
+  }).format(utc);
 }
-
-function formatDateShort(date) {
-  return date.toLocaleDateString('en-US', {
-    month: 'numeric',
-    day: 'numeric',
-    year: '2-digit',
-    timeZone: 'America/Chicago'
-  });
+function fmtDate(utc, tz) {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, weekday: 'short', month: 'short', day: 'numeric'
+  }).format(utc);
 }
+function pad(n) { return String(Math.floor(n)).padStart(2, '0'); }
 
-function pad2(n) { return String(n).padStart(2, '0'); }
-
-function getCountdown(target) {
-  const diff = target - Date.now();
+function countdown(utc) {
+  const diff = utc - Date.now();
   if (diff <= 0) return null;
-  const total = Math.floor(diff / 1000);
   return {
-    d: Math.floor(total / 86400),
-    h: Math.floor((total % 86400) / 3600),
-    m: Math.floor((total % 3600) / 60),
-    s: total % 60
+    days:  Math.floor(diff / 86400000),
+    hours: Math.floor((diff % 86400000) / 3600000),
+    mins:  Math.floor((diff % 3600000) / 60000),
+    secs:  Math.floor((diff % 60000) / 1000),
   };
 }
 
-// Build initial cards
-const events = recordings.map(r => {
-  const target = getCentralTime(r.year, r.month, r.day);
-  const mplsTime = formatLocalTime(target, 'America/Chicago'); // Minneapolis = Central
-  const phxTime = formatLocalTime(target, 'America/Phoenix');
-  return { ...r, target, mplsTime, phxTime, dateStr: formatDateShort(target) };
-});
+// ── Pre-compute UTC times ────────────────────────────────────────
+const recs = recordings.map(r => ({ ...r, utc: centralToUTC(r.date, r.ct) }));
 
-const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-document.getElementById('tzNote').innerHTML =
-  `Your timezone: <strong>${userTZ}</strong>`;
-
+// ── Render ───────────────────────────────────────────────────────
 function render() {
   const now = Date.now();
-  const container = document.getElementById('cardsContainer');
+  const nextIdx = recs.findIndex(r => r.utc > now);
+  const container = document.getElementById('recordings');
+  container.innerHTML = '';
 
-  // Find next upcoming
-  let nextIdx = -1;
-  for (let i = 0; i < events.length; i++) {
-    if (events[i].target > now) { nextIdx = i; break; }
-  }
+  let curFY = null, fyDiv = null;
 
-  let html = '';
+  recs.forEach((rec, i) => {
+    const type = rec.utc <= now ? 'past' : (i === nextIdx ? 'next' : 'future');
 
-  // Past section label if any are past
-  const pastCount = events.filter(e => e.target <= now).length;
-  if (pastCount > 0 && nextIdx > 0) {
-    // past cards rendered after future (put them at bottom actually — keep chronological)
-  }
-
-  events.forEach((ev, idx) => {
-    const isPast = ev.target <= now;
-    const isNext = idx === nextIdx;
-    const isLive = !isPast && ev.target - now < 3600000 && ev.target - now > 0; // within 1hr
-
-    const cd = getCountdown(ev.target);
-
-    let cdHTML = '';
-    if (isPast) {
-      cdHTML = `<div class="completed-mark">RECORDED</div>`;
-    } else if (cd) {
-      const sep = (s) => `<div class="cd-sep">${s}</div>`;
-      if (isNext) {
-        cdHTML = `<div class="countdown">
-          <div class="cd-unit"><div class="cd-value" id="d${idx}">${pad2(cd.d)}</div><div class="cd-label">Days</div></div>
-          ${sep(':')}
-          <div class="cd-unit"><div class="cd-value" id="h${idx}">${pad2(cd.h)}</div><div class="cd-label">Hours</div></div>
-          ${sep(':')}
-          <div class="cd-unit"><div class="cd-value" id="m${idx}">${pad2(cd.m)}</div><div class="cd-label">Mins</div></div>
-          ${sep(':')}
-          <div class="cd-unit"><div class="cd-value" id="s${idx}">${pad2(cd.s)}</div><div class="cd-label">Secs</div></div>
-        </div>`;
-      } else {
-        cdHTML = `<div class="countdown">
-          <div class="cd-unit"><div class="cd-value" id="d${idx}">${pad2(cd.d)}</div><div class="cd-label">D</div></div>
-          ${sep(':')}
-          <div class="cd-unit"><div class="cd-value" id="h${idx}">${pad2(cd.h)}</div><div class="cd-label">H</div></div>
-          ${sep(':')}
-          <div class="cd-unit"><div class="cd-value" id="m${idx}">${pad2(cd.m)}</div><div class="cd-label">M</div></div>
-          ${sep(':')}
-          <div class="cd-unit"><div class="cd-value" id="s${idx}">${pad2(cd.s)}</div><div class="cd-label">S</div></div>
-        </div>`;
-      }
+    if (rec.fy !== curFY) {
+      curFY = rec.fy;
+      fyDiv = document.createElement('div');
+      fyDiv.className = 'fy-section';
+      fyDiv.innerHTML = `<div class="fy-label">${rec.fy}</div>`;
+      container.appendChild(fyDiv);
     }
 
-    const localUserTime = ev.target.toLocaleTimeString('en-US', {
-      timeZone: userTZ,
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
+    const card = document.createElement('div');
+    card.className = `recording-card ${type}`;
+    card.dataset.label = rec.label;
 
-    html += `
-      <div class="card ${isPast ? 'past' : ''} ${isNext ? 'next' : ''}">
-        <div class="card-header">
-          <div class="card-title">${ev.id}${isLive ? '<span class="live-banner">LIVE</span>' : ''}</div>
-          <div class="card-date">${ev.dateStr} • 9:30 AM Central</div>
-        </div>
-        ${cdHTML}
-        ${!isPast ? `<div class="local-times">
-          <span>Minneapolis: ${ev.mplsTime}</span>
-          <span>Phoenix: ${ev.phxTime}</span>
-          ${userTZ !== 'America/Chicago' && userTZ !== 'America/Phoenix' ? `<span>Your time: ${localUserTime}</span>` : ''}
-        </div>` : ''}
-      </div>`;
+    const mnDate = fmtDate(rec.utc, 'America/Chicago');
+    const mnTime = fmtTime(rec.utc, 'America/Chicago');
+    const phxTime = fmtTime(rec.utc, 'America/Phoenix');
+    const phxDate = fmtDate(rec.utc, 'America/Phoenix');
+
+    if (type === 'past') {
+      card.innerHTML = `
+        <div class="card-inner">
+          <span class="ep-label">${rec.label}</span>
+          <span class="ep-date">${mnDate}</span>
+        </div>`;
+    } else if (type === 'next') {
+      card.innerHTML = `
+        <span class="next-badge">Next</span>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="ep-label">${rec.label}</span>
+            <span class="ep-date">${mnDate}</span>
+          </div>
+          <div class="times-row">
+            <div class="time-entry"><b>MN</b>${mnDate} · ${mnTime}</div>
+            <div class="time-entry"><b>PHX</b>${phxDate} · ${phxTime}</div>
+          </div>
+          <div class="countdown-big">
+            <div class="cd-unit"><span class="cd-value" id="cd-d">—</span><span class="cd-label">Days</span></div>
+            <div class="cd-unit"><span class="cd-value" id="cd-h">—</span><span class="cd-label">Hours</span></div>
+            <div class="cd-unit"><span class="cd-value" id="cd-m">—</span><span class="cd-label">Min</span></div>
+            <div class="cd-unit"><span class="cd-value" id="cd-s">—</span><span class="cd-label">Sec</span></div>
+          </div>
+        </div>`;
+    } else {
+      const safeId = 'sm_' + rec.label.replace(/\W/g, '_');
+      card.innerHTML = `
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="ep-label">${rec.label}</span>
+            <span class="ep-date">${mnDate}</span>
+            <span class="countdown-small" id="${safeId}">—</span>
+          </div>
+          <div class="times-row">
+            <div class="time-entry"><b>MN</b>${mnTime}</div>
+            <div class="time-entry"><b>PHX</b>${phxTime}</div>
+          </div>
+        </div>`;
+    }
+
+    fyDiv.appendChild(card);
   });
-
-  container.innerHTML = html;
 }
 
-// Live tick update (only update numbers, don't re-render full DOM after first paint)
+// ── Tick (every second) ──────────────────────────────────────────
 function tick() {
   const now = Date.now();
-  let nextIdx = -1;
-  for (let i = 0; i < events.length; i++) {
-    if (events[i].target > now) { nextIdx = i; break; }
+
+  // Big countdown
+  const cdD = document.getElementById('cd-d');
+  if (cdD) {
+    const nextRec = recs.find(r => r.utc > now);
+    if (nextRec) {
+      const cd = countdown(nextRec.utc);
+      if (cd) {
+        document.getElementById('cd-d').textContent = pad(cd.days);
+        document.getElementById('cd-h').textContent = pad(cd.hours);
+        document.getElementById('cd-m').textContent = pad(cd.mins);
+        document.getElementById('cd-s').textContent = pad(cd.secs);
+      }
+    }
   }
 
-  events.forEach((ev, idx) => {
-    const isPast = ev.target <= now;
-    if (isPast) return;
-    const cd = getCountdown(ev.target);
-    if (!cd) { render(); return; } // transition: re-render
-    const dEl = document.getElementById(`d${idx}`);
-    const hEl = document.getElementById(`h${idx}`);
-    const mEl = document.getElementById(`m${idx}`);
-    const sEl = document.getElementById(`s${idx}`);
-    if (dEl) dEl.textContent = pad2(cd.d);
-    if (hEl) hEl.textContent = pad2(cd.h);
-    if (mEl) mEl.textContent = pad2(cd.m);
-    if (sEl) sEl.textContent = pad2(cd.s);
+  // Small countdowns
+  recs.forEach(rec => {
+    if (rec.utc <= now) return;
+    const id = 'sm_' + rec.label.replace(/\W/g, '_');
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cd = countdown(rec.utc);
+    if (!cd) return;
+    el.textContent = cd.days > 0
+      ? `${cd.days}d ${pad(cd.hours)}h ${pad(cd.mins)}m`
+      : `${pad(cd.hours)}h ${pad(cd.mins)}m ${pad(cd.secs)}s`;
   });
+
+  // Clock
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
 }
 
+// ── Init ─────────────────────────────────────────────────────────
 render();
+tick();
 setInterval(tick, 1000);
-// Full re-render once a minute to catch transitions cleanly
-setInterval(render, 60000);
+setInterval(render, 30000); // re-render periodically to catch state changes
 </script>
 </body>
 </html>
