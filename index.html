@@ -3,21 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APJ Recording Counters</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<title>APJ Recording Countdown</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0f14;
-    --surface: #13161e;
-    --border: #1e2330;
-    --accent: #c9a96e;
-    --accent-dim: #7a6340;
-    --text: #e8e2d9;
-    --text-muted: #4a5168;
-    --text-dim: #2a2f40;
-    --past-text: #2a2f40;
-    --next-glow: rgba(201,169,110,0.12);
-    --fy27: #7ab0d4;
+    --bg: #0b0d12;
+    --surface: #12151d;
+    --border: #252a38;
+    --border-dim: #181c26;
+    --accent: #e8c27a;
+    --accent-dim: #8a6f3a;
+    --accent-faint: rgba(232,194,122,0.08);
+    --text: #f0ecdf;
+    --text-sub: #8a92a8;
+    --text-muted: #404860;
+    --text-dim: #252935;
+    --next-glow: rgba(232,194,122,0.14);
+    --fy27: #88bbdf;
+    --fy27-dim: #3a6080;
+    --live: #ff4444;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -37,8 +41,8 @@
     position: fixed;
     inset: 0;
     background-image:
-      linear-gradient(rgba(201,169,110,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(201,169,110,0.025) 1px, transparent 1px);
+      linear-gradient(rgba(232,194,122,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,194,122,0.025) 1px, transparent 1px);
     background-size: 48px 48px;
     pointer-events: none;
     z-index: 0;
@@ -58,20 +62,20 @@
   }
 
   .epigraph {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 0.82rem;
+    font-size: 0.7rem;
+    font-weight: 300;
     color: var(--accent-dim);
-    letter-spacing: 0.1em;
-    margin-bottom: 16px;
+    letter-spacing: 0.12em;
+    margin-bottom: 14px;
+    font-style: italic;
   }
 
   .site-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-size: clamp(1.4rem, 4vw, 2rem);
     font-weight: 700;
     color: var(--text);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     line-height: 1.1;
   }
 
@@ -86,7 +90,7 @@
     height: 1px;
     width: 48px;
     background: var(--accent);
-    opacity: 0.35;
+    opacity: 0.3;
     display: block;
   }
   .title-rule em {
@@ -99,19 +103,21 @@
 
   #clock {
     margin-top: 10px;
-    font-size: 0.58rem;
-    color: var(--text-muted);
+    font-size: 0.6rem;
+    font-weight: 400;
+    color: var(--text-sub);
     letter-spacing: 0.1em;
   }
 
   /* ── FY section ── */
-  .fy-section { margin-bottom: 40px; }
+  .fy-section { margin-bottom: 36px; }
 
   .fy-label {
-    font-size: 0.55rem;
-    letter-spacing: 0.3em;
+    font-size: 0.52rem;
+    font-weight: 600;
+    letter-spacing: 0.35em;
     text-transform: uppercase;
-    color: var(--text-dim);
+    color: var(--text-muted);
     margin-bottom: 10px;
     padding-left: 2px;
   }
@@ -119,73 +125,103 @@
   /* ── Cards ── */
   .recording-card {
     position: relative;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-dim);
     border-radius: 3px;
-    margin-bottom: 7px;
+    margin-bottom: 6px;
     overflow: hidden;
     transition: opacity 0.4s;
   }
 
   /* PAST */
   .recording-card.past {
-    background: #0f1118;
-    border-color: #161820;
-    opacity: 0.32;
+    background: #0e1018;
+    border-color: #14161e;
+    opacity: 0.28;
   }
-
   .recording-card.past .card-inner {
-    padding: 8px 16px;
+    padding: 7px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
   }
-
   .recording-card.past .ep-label {
     font-size: 0.6rem;
-    color: var(--text-dim);
-    letter-spacing: 0.06em;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.07em;
   }
-
   .recording-card.past .ep-date {
     font-size: 0.58rem;
-    color: var(--text-dim);
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* LIVE (within 75 min after start) */
+  .recording-card.live {
+    background: #130a0a;
+    border-color: #3a1010;
+  }
+  .recording-card.live::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--live);
+    animation: livepulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes livepulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  .live-badge {
+    position: absolute;
+    top: 13px; right: 14px;
+    font-size: 0.52rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--live);
+    text-transform: uppercase;
+    animation: livepulse 1.2s ease-in-out infinite;
   }
 
   /* NEXT */
   .recording-card.next {
-    background: linear-gradient(135deg, #161921 0%, #1b1e28 100%);
+    background: linear-gradient(135deg, #14171f 0%, #181c27 100%);
     border-color: var(--accent-dim);
     box-shadow:
       0 0 48px var(--next-glow),
-      0 0 100px rgba(201,169,110,0.03),
-      inset 0 1px 0 rgba(201,169,110,0.08);
+      0 0 100px rgba(232,194,122,0.04),
+      inset 0 1px 0 rgba(232,194,122,0.07);
   }
-
   .recording-card.next::before {
     content: '';
     position: absolute;
     left: 0; top: 0; bottom: 0;
     width: 3px;
-    background: linear-gradient(180deg, var(--accent) 0%, rgba(201,169,110,0.1) 100%);
+    background: linear-gradient(180deg, var(--accent) 0%, rgba(232,194,122,0.1) 100%);
   }
 
   .next-badge {
     position: absolute;
-    top: 14px; right: 16px;
+    top: 13px; right: 14px;
     font-size: 0.48rem;
-    letter-spacing: 0.28em;
+    font-weight: 600;
+    letter-spacing: 0.3em;
     color: var(--accent);
-    opacity: 0.65;
+    opacity: 0.7;
     text-transform: uppercase;
   }
 
   /* FUTURE */
   .recording-card.future {
     background: var(--surface);
+    border-color: var(--border);
   }
 
   /* ── Card inner ── */
-  .card-inner { padding: 14px 18px; }
+  .card-inner { padding: 13px 18px; }
 
   .card-top {
     display: flex;
@@ -203,61 +239,63 @@
 
   .recording-card.future .ep-label {
     color: var(--fy27);
-    opacity: 0.55;
+    opacity: 0.7;
+  }
+
+  .recording-card.live .ep-label {
+    color: #ff7070;
   }
 
   .ep-date {
     font-size: 0.65rem;
-    color: var(--text-muted);
+    font-weight: 400;
+    color: var(--text-sub);
     letter-spacing: 0.04em;
   }
 
   /* Times */
   .times-row {
     display: flex;
-    gap: 18px;
-    margin-top: 5px;
-    margin-bottom: 0;
+    gap: 20px;
+    margin-top: 6px;
   }
-
   .time-entry {
     font-size: 0.52rem;
-    color: var(--text-dim);
+    font-weight: 300;
+    color: var(--text-muted);
     letter-spacing: 0.05em;
   }
-
   .time-entry b {
-    color: var(--text-muted);
-    font-weight: 400;
-    margin-right: 3px;
+    font-weight: 600;
+    color: var(--text-sub);
+    margin-right: 4px;
   }
 
   /* ── BIG countdown ── */
   .countdown-big {
     display: flex;
     align-items: flex-end;
-    margin-top: 20px;
-    border-top: 1px solid rgba(201,169,110,0.1);
-    padding-top: 18px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(232,194,122,0.1);
   }
 
   .cd-unit {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 16px 0 0;
-    margin-right: 16px;
+    padding-right: 18px;
+    margin-right: 18px;
     border-right: 1px solid var(--border);
   }
   .cd-unit:last-child { border-right: none; padding-right: 0; margin-right: 0; }
 
   .cd-value {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.4rem, 7vw, 4.2rem);
+    font-size: clamp(2.6rem, 7vw, 4.4rem);
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.04em;
     font-variant-numeric: tabular-nums;
     min-width: 2ch;
     text-align: center;
@@ -265,7 +303,8 @@
 
   .cd-label {
     font-size: 0.42rem;
-    letter-spacing: 0.22em;
+    font-weight: 500;
+    letter-spacing: 0.25em;
     color: var(--accent-dim);
     text-transform: uppercase;
     margin-top: 5px;
@@ -274,8 +313,9 @@
   /* ── Small countdown for future ── */
   .countdown-small {
     font-size: 0.58rem;
-    color: var(--text-muted);
-    opacity: 0.55;
+    font-weight: 400;
+    color: var(--text-sub);
+    opacity: 0.7;
     margin-left: auto;
     letter-spacing: 0.04em;
     white-space: nowrap;
@@ -286,7 +326,8 @@
     text-align: center;
     margin-top: 52px;
     font-size: 0.52rem;
-    color: var(--text-dim);
+    font-weight: 300;
+    color: var(--text-muted);
     letter-spacing: 0.1em;
   }
 </style>
@@ -296,18 +337,19 @@
 
   <div class="header">
     <div class="epigraph">"So teach us to number our days"</div>
-    <h1 class="site-title">APJ Recording Counters</h1>
+    <h1 class="site-title">APJ Recording Countdown</h1>
     <div class="title-rule"><span></span><em>Live</em><span></span></div>
     <div id="clock"></div>
   </div>
 
   <div id="recordings"></div>
 
-  <div class="footer">Countdown in your local time &nbsp;·&nbsp; Recording times shown for Minneapolis (Central) and Phoenix (MST/no DST)</div>
+  <div class="footer">Times shown in your local timezone &nbsp;·&nbsp; Minneapolis = Central &nbsp;·&nbsp; Phoenix = MST (no DST)</div>
 </div>
 
 <script>
-// ── Data (Central time) ──────────────────────────────────────────
+const LIVE_WINDOW_MS = 75 * 60 * 1000; // 75 minutes
+
 const recordings = [
   { label: 'FY26 #18', date: '2026-04-01', ct: '10:30', fy: 'FY26' },
   { label: 'FY26 #19', date: '2026-04-07', ct: '09:30', fy: 'FY26' },
@@ -327,14 +369,10 @@ const recordings = [
   { label: 'FY27 #12', date: '2026-12-15', ct: '09:30', fy: 'FY27' },
 ];
 
-// ── Central → UTC ────────────────────────────────────────────────
 function centralToUTC(dateStr, timeStr) {
   const [yr, mo, dy] = dateStr.split('-').map(Number);
   const [hr, mn] = timeStr.split(':').map(Number);
-  // Create a date object representing this wall-clock time in local time,
-  // then adjust by the difference between local and Chicago.
   const localDate = new Date(yr, mo - 1, dy, hr, mn, 0);
-  // Format that UTC moment as Chicago time
   const chicagoParts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Chicago',
     year: 'numeric', month: 'numeric', day: 'numeric',
@@ -345,11 +383,9 @@ function centralToUTC(dateStr, timeStr) {
   chicagoParts.forEach(p => { if (p.type !== 'literal') cp[p.type] = parseInt(p.value); });
   const chicagoAsLocal = new Date(cp.year, cp.month - 1, cp.day,
     cp.hour === 24 ? 0 : cp.hour, cp.minute, cp.second);
-  const offset = localDate - chicagoAsLocal;
-  return new Date(localDate.getTime() + offset);
+  return new Date(localDate.getTime() + (localDate - chicagoAsLocal));
 }
 
-// ── Format helpers ───────────────────────────────────────────────
 function fmtTime(utc, tz) {
   return new Intl.DateTimeFormat('en-US', {
     timeZone: tz, hour: 'numeric', minute: '2-digit', hour12: true
@@ -362,8 +398,8 @@ function fmtDate(utc, tz) {
 }
 function pad(n) { return String(Math.floor(n)).padStart(2, '0'); }
 
-function countdown(utc) {
-  const diff = utc - Date.now();
+function getCountdown(utcMs) {
+  const diff = utcMs - Date.now();
   if (diff <= 0) return null;
   return {
     days:  Math.floor(diff / 86400000),
@@ -373,20 +409,37 @@ function countdown(utc) {
   };
 }
 
-// ── Pre-compute UTC times ────────────────────────────────────────
-const recs = recordings.map(r => ({ ...r, utc: centralToUTC(r.date, r.ct) }));
+function getType(rec) {
+  const now = Date.now();
+  const elapsed = now - rec.utc;
+  if (elapsed >= LIVE_WINDOW_MS) return 'past';      // fully past
+  if (elapsed >= 0) return 'live';                   // 0–75 min after start
+  // future — check if it's the next upcoming
+  return null; // resolved below
+}
 
-// ── Render ───────────────────────────────────────────────────────
+const recs = recordings.map(r => ({ ...r, utc: centralToUTC(r.date, r.ct).getTime() }));
+
 function render() {
   const now = Date.now();
-  const nextIdx = recs.findIndex(r => r.utc > now);
   const container = document.getElementById('recordings');
   container.innerHTML = '';
+
+  // Determine types
+  const types = recs.map((rec, i) => {
+    const elapsed = now - rec.utc;
+    if (elapsed >= LIVE_WINDOW_MS) return 'past';
+    if (elapsed >= 0) return 'live';
+    return 'upcoming'; // resolve next vs future below
+  });
+
+  const nextIdx = types.findIndex(t => t === 'upcoming');
+  const finalTypes = types.map((t, i) => t === 'upcoming' ? (i === nextIdx ? 'next' : 'future') : t);
 
   let curFY = null, fyDiv = null;
 
   recs.forEach((rec, i) => {
-    const type = rec.utc <= now ? 'past' : (i === nextIdx ? 'next' : 'future');
+    const type = finalTypes[i];
 
     if (rec.fy !== curFY) {
       curFY = rec.fy;
@@ -405,12 +458,34 @@ function render() {
     const phxTime = fmtTime(rec.utc, 'America/Phoenix');
     const phxDate = fmtDate(rec.utc, 'America/Phoenix');
 
+    const timesHTML = `
+      <div class="times-row">
+        <div class="time-entry"><b>MN</b>${mnDate} · ${mnTime}</div>
+        <div class="time-entry"><b>PHX</b>${phxDate} · ${phxTime}</div>
+      </div>`;
+
     if (type === 'past') {
       card.innerHTML = `
         <div class="card-inner">
           <span class="ep-label">${rec.label}</span>
           <span class="ep-date">${mnDate}</span>
         </div>`;
+
+    } else if (type === 'live') {
+      const minsLeft = Math.ceil((LIVE_WINDOW_MS - (now - rec.utc)) / 60000);
+      card.innerHTML = `
+        <span class="live-badge">● Live</span>
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="ep-label">${rec.label}</span>
+            <span class="ep-date">${mnDate}</span>
+          </div>
+          ${timesHTML}
+          <div style="margin-top:12px; font-size:0.6rem; font-weight:500; color:#ff7070; letter-spacing:0.08em; opacity:0.8;">
+            Recording window · <span id="live-remaining-${i}"></span> remaining
+          </div>
+        </div>`;
+
     } else if (type === 'next') {
       card.innerHTML = `
         <span class="next-badge">Next</span>
@@ -419,17 +494,15 @@ function render() {
             <span class="ep-label">${rec.label}</span>
             <span class="ep-date">${mnDate}</span>
           </div>
-          <div class="times-row">
-            <div class="time-entry"><b>MN</b>${mnDate} · ${mnTime}</div>
-            <div class="time-entry"><b>PHX</b>${phxDate} · ${phxTime}</div>
-          </div>
+          ${timesHTML}
           <div class="countdown-big">
-            <div class="cd-unit"><span class="cd-value" id="cd-d">—</span><span class="cd-label">Days</span></div>
-            <div class="cd-unit"><span class="cd-value" id="cd-h">—</span><span class="cd-label">Hours</span></div>
-            <div class="cd-unit"><span class="cd-value" id="cd-m">—</span><span class="cd-label">Min</span></div>
-            <div class="cd-unit"><span class="cd-value" id="cd-s">—</span><span class="cd-label">Sec</span></div>
+            <div class="cd-unit"><span class="cd-value" id="cd-d">--</span><span class="cd-label">Days</span></div>
+            <div class="cd-unit"><span class="cd-value" id="cd-h">--</span><span class="cd-label">Hours</span></div>
+            <div class="cd-unit"><span class="cd-value" id="cd-m">--</span><span class="cd-label">Min</span></div>
+            <div class="cd-unit"><span class="cd-value" id="cd-s">--</span><span class="cd-label">Sec</span></div>
           </div>
         </div>`;
+
     } else {
       const safeId = 'sm_' + rec.label.replace(/\W/g, '_');
       card.innerHTML = `
@@ -439,10 +512,7 @@ function render() {
             <span class="ep-date">${mnDate}</span>
             <span class="countdown-small" id="${safeId}">—</span>
           </div>
-          <div class="times-row">
-            <div class="time-entry"><b>MN</b>${mnTime}</div>
-            <div class="time-entry"><b>PHX</b>${phxTime}</div>
-          </div>
+          ${timesHTML}
         </div>`;
     }
 
@@ -450,16 +520,15 @@ function render() {
   });
 }
 
-// ── Tick (every second) ──────────────────────────────────────────
 function tick() {
   const now = Date.now();
 
-  // Big countdown
+  // Big countdown (next)
   const cdD = document.getElementById('cd-d');
   if (cdD) {
     const nextRec = recs.find(r => r.utc > now);
     if (nextRec) {
-      const cd = countdown(nextRec.utc);
+      const cd = getCountdown(nextRec.utc);
       if (cd) {
         document.getElementById('cd-d').textContent = pad(cd.days);
         document.getElementById('cd-h').textContent = pad(cd.hours);
@@ -469,13 +538,25 @@ function tick() {
     }
   }
 
-  // Small countdowns
+  // Live remaining
+  recs.forEach((rec, i) => {
+    const el = document.getElementById(`live-remaining-${i}`);
+    if (!el) return;
+    const elapsed = now - rec.utc;
+    const remaining = LIVE_WINDOW_MS - elapsed;
+    if (remaining > 0) {
+      const m = Math.floor(remaining / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      el.textContent = `${m}m ${pad(s)}s`;
+    }
+  });
+
+  // Small countdowns (future)
   recs.forEach(rec => {
-    if (rec.utc <= now) return;
     const id = 'sm_' + rec.label.replace(/\W/g, '_');
     const el = document.getElementById(id);
     if (!el) return;
-    const cd = countdown(rec.utc);
+    const cd = getCountdown(rec.utc);
     if (!cd) return;
     el.textContent = cd.days > 0
       ? `${cd.days}d ${pad(cd.hours)}h ${pad(cd.mins)}m`
@@ -484,14 +565,16 @@ function tick() {
 
   // Clock
   document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+    new Date().toLocaleTimeString('en-US', {
+      hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
+    });
 }
 
-// ── Init ─────────────────────────────────────────────────────────
+// Init
 render();
 tick();
 setInterval(tick, 1000);
-setInterval(render, 30000); // re-render periodically to catch state changes
+setInterval(render, 15000); // re-render to catch state changes
 </script>
 </body>
 </html>
